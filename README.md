@@ -1,3 +1,3 @@
 # lab2
-react-router
+React-Router<br>
 Simple SPA application with the use of React-Router
