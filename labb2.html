@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8" />
+	<title>labb2</title>
+	<script src="react.development.js"></script>
+	<script src="react-dom.development.js"></script>
+	<script src="create-react-class.js"></script>
+	<script src="babel.js"></script>
+	<script src="react-router-dom.js"></script>
+	<style>
+		img {
+			width: 300px;
+			height: 250px;
+		}
+
+		table,
+		tr,
+		th {
+			border: 1px solid black;
+		}
+
+		table,
+		th,
+		tr,
+		td {
+			width: 50%;
+		}
+
+		th {
+			height: 50px;
+		}
+
+		td {
+			padding: 0px 280px 0px 50px;
+			text-align: right;
+		}
+
+		.CitiesNames>p {
+			display: inline;
+			padding: 10px 120px 10px 120px;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="app"></div>
+	<div id="app2"></div>
+	<div id="app3"></div>
+	<script type="text/jsx">
+
+		var HashRouter = ReactRouterDOM.HashRouter;
+		var Link = ReactRouterDOM.Link;
+		var Route = ReactRouterDOM.Route;
+
+				class CitiesComponent extends React.Component {
+				  constructor(props) {
+				    super();
+				    this.state = {value: '', cities: [] };
+				    this.onClick = this.onClick.bind(this);
+						this.onPost = this.onPost.bind(this);
+
+				  }
+				  onClick(event) {
+				    this.setState({ value: event.target.value });
+				  }
+
+					onPost(){
+						fetch('http://cities.jonkri.se/', {
+						body: '{ "name": "' + this.state.city + '", "population": ' + Number(this.state.pop) + ' }',
+						headers: {
+						'Content-Type': 'application/json'
+						},
+						method: 'POST'
+						}).then(function (response) {
+						return response.json();
+						}).then(function (result) {
+						this.setState({cities: result });
+					}.bind(this));
+					}
+
+					componentDidMount(){
+						this.setState({cities: this.props.data});
+					}
+
+				  render() {
+					return <div>
+					<table>
+					<tbody>
+
+					{(this.state.cities).map(function(value){
+						return <tr key={value.name}>
+						 <td>{value.name}</td>
+						 <td>{value.population}</td>
+						 </tr>
+					 })}
+					 </tbody>
+					 </table>
+					 <p>Add a name of a city and population quantity, then click "Post city"</p>
+					 <button onClick={this.onPost}>Post city</button>
+					 <input onChange={function(event){
+						 this.setState({city: event.target.value});
+					 }.bind(this)} value={this.state.city}></input>
+
+					 <input type="number" onChange={function(event){
+						 this.setState({pop: event.target.value});
+					 }.bind(this)} value={this.state.pop}></input>
+					</div>
+				  }
+				}
+
+		var GalleryComponent = createReactClass ({
+			render: function (){
+			return <div>
+			<h1>Gallery</h1>
+			<p>Gallery presenting the biggest cities across Sweden</p>
+			<div className='CitiesNames'>
+				<p>Stockholm</p>
+				<p>Göteborg</p>
+				<p>Malmö</p>
+				<p>Uppsala</p>
+				<p>Västerås</p>
+			</div>
+			<img src="stockholm.jpg" />
+			<img src="goteborg.jpg" />
+			<img src="malmo.jpg" />
+			<img src="uppsala.jpg" />
+			<img src="vasteras.jpg" />
+		</div>; } });
+
+		var AboutComponent = createReactClass ({
+			render: function (){
+			return <div>
+			<h1>Little about Sweden...</h1>
+			<ol>
+				<p>Here are three interesting facts about Sweden.</p>
+				<li>Despite being a military power in the 17th century and one of the world’s largest producers of weapons, Sweden has not participated in any war for almost two centuries, including both world wars.</li>
+				<li>Around 2,000 years ago, the Svear people gave Sweden its name. In their language, svear meant “us” and rike meant “kingdom.” So, Sverige, the modern Swedish name of the country, means “Our Kingdom.”</li>
+				<li>With a tax rate of 51.4% of GDP, Swedes are one of the most highly taxed populations in the world. Ironically, they are generally happy to pay a high tax rate, and the Swedish word for tax is skatt, or “treasure.”</li>
+			</ol>
+			<p>Source: https://www.factretriever.com/sweden-facts</p>
+		</div>; } });
+
+
+		fetch('http://cities.jonkri.se/').then(function(response){
+			return response.json();
+		}).then(function(result){
+			console.log(result);
+			ReactDOM.render(
+					<HashRouter>
+					<div>
+						<nav>
+							<ul>
+								<li><Link to="/cities">Cities</Link></li>
+								<li><Link to="/gallery">Gallery</Link></li>
+								<li><Link to="/about">About</Link></li>
+							</ul>
+						</nav>
+				<Route path="/cities" render={function (props) { return <CitiesComponent {...props} data={result}/>; }} />
+
+				<Route component={GalleryComponent} path="/gallery"></Route>
+				<Route component={AboutComponent} path="/about"></Route>
+			</div>
+		</HashRouter>, document.getElementById('app')); });
+
+	</script>
+</body>
+</html>
